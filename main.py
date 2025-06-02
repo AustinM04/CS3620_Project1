@@ -1,10 +1,6 @@
 import os.path
 import random
-import string
-from codecs import namereplace_errors
 from enum import Enum
-from random import Random
-from symtable import Class
 import re
 
 #######################################################################################################################
@@ -204,7 +200,7 @@ def validateInput(choice1, choice2, question):
     return None
 def questionCreator(speech_choice1, speech_choice2, player_name_pad = 0):
 
-    question = f"Choose something to say\n[1]: {speech_choice1[player_name_pad: player_name_pad + 20]}...\nor\n[2]: {speech_choice2[player_name_pad:player_name_pad + 20]}...\nSelection: "
+    question = f"Choose something to say\n[1]: {speech_choice1[player_name_pad: player_name_pad + 30]}...\nor\n[2]: {speech_choice2[player_name_pad:player_name_pad + 30]}...\nSelection: "
     return question
 
 def new_branch(player,branch_text, stage):
@@ -236,8 +232,8 @@ def start_game(player):
             break
     player.name = check_name.title()
 
-    # Declares the narrative string that is used for this initial starting point
-    start_game_string = (f"Kormie: WAKE UP {player.name.upper()} WAKE UP!!! How are you still asleep with all this ruckus?!!?! Nevermind, we havent much time.\n"
+    # Declares the narrative string used for this initial starting point
+    start_game_string = (f"Kormie: WAKE UP {player.name.upper()} WAKE UP!!! How are you still asleep with all this ruckus?!!?! Nevermind, we haven't much time.\n"
           "Our ship has sustained significant damage, raiders have invaded sectors 2, 5, 9, and have even infiltrated\n"
           "the polyhedron deck and have taken Captain Montak and the whole flight crew hostage! I hate to say it but\n"
           "you and I may be the only ones that have not been captured or executed")
@@ -330,7 +326,7 @@ def branch_r2(player,branch_text):
     stage = Stage.R2
     new_branch(player, branch_text, stage)
     narrative = (f"Narrator: You enter sector 2 and you see bodies strewn about and raiders rummaging through the\n"
-                 f"corpses of who used to be your friends and colleagues"
+                 f"corpses of who used to be your friends and colleagues\n"
                  f"Kormie, whispering: This is so much worse than what I saw only a hour ago..... would you like to\n"
                  f"pick a [fight] these raiders head on or do you want to go through those [vents]?\n"
                  f"I know a special route if we take the vents.\n")
@@ -379,17 +375,17 @@ def branch_r3(player, branch_text):
     new_branch(player, branch_text, stage)
     narrative = ("Narrator: You and Kormie quietly sneak over to the vent opening and make your way in. Kormie points\n"
                  "out a loose panel on the ceiling of the vent. You reach up and slide it to the side, and climb up,\n"
-                 " pulling Kormie behind you. You look around you and notice that this is the security room in\n"
-                 " sector 9.\n"
+                 "pulling Kormie behind you. You look around you and notice that this is the security room in\n"
+                 "sector 9.\n"
                  "Kormie: This is how I got back here alive, I could have never gotten past the beast the raiders\n"
                  "accidentally let out in sector 5, those numb-skulls\n")
     print(narrative)
     adventureText += narrative
-    player_dialogue1 = (f"{player.name}Well that was the most sightly scene I have ever seen, I am glad we were able to get out of\n"
+    player_dialogue1 = (f"{player.name}: Well that was the most sightly scene I have ever seen, I am glad we were able to get out of\n"
                         "there alive. Thank you Kormie. I’m glad we don’t have to deal with that normag fendle, I\n"
                         "remember how hard it was to contain when we found it on juineen alpha, Im glad It was on the\n"
                         "smaller side otherwise we would have been toast!")
-    player_dialogue2 = f"{player.name}Yeah yeah yeah, we have a mission we need to get to, no time for chit chat!"
+    player_dialogue2 = f"{player.name}: Yeah yeah yeah, we have a mission we need to get to, no time for chit chat!"
     player_dialogue_choice = validateInput("1", "2", questionCreator(player_dialogue1,player_dialogue2,player.get_name_pad()))
     if player_dialogue_choice == "1":
         print(player_dialogue1)
@@ -406,8 +402,8 @@ def branch_r3(player, branch_text):
     adventureText += narrative2
     if player.checkInventory(Item.MEDIUM_GEARS):
         branch_text = (f"{player.name}: It looks like I have just what we need right here! Let me just put this in here\n"
-                       f"Uhhhhh, yeah I think that goes, there, then we do that, *click* *tuk tuk tuk tuk tuk* "
-                       f"Narrator: The door opens up with ease!"
+                       f"Uhhhhh, yeah I think that goes, there, then we do that, *click* *tuk tuk tuk tuk tuk*\n"
+                       f"Narrator: The door opens up with ease!\n"
                        f"Kormie: How did you do that? That takes some serious skill! Be very quiet going out that door,\n"
                        f" the raider that chased me is right outside.\n")
         branch_r3_sect9(player, branch_text)
@@ -417,10 +413,10 @@ def branch_r3(player, branch_text):
         branch_sector_5(player, branch_text)
     else:
         player_dialogue3 = (f"{player.name}: Lets go back, I dont know whats on the other side of that glass, I don't\n"
-                            f"want to draw more attention than needed to ourselves"
+                            f"want to draw more attention than needed to ourselves\n"
                             f"Narrator: You head back down into the vents, you dont get to sector 9 like before but the vent\n"
                             f"lands you right at the entrance of sector 3. You did not have to deal with the raiders in sector 3\n")
-        player_dialogue4 = f"{player.name: *breaks the glass* }"
+        player_dialogue4 = f"{player.name: *breaks the glass* That should do it!}"
         branch_choice = validateInput("1", "2", questionCreator(player_dialogue3,player_dialogue4, player.get_name_pad()))
         if branch_choice == "1":
             branch_sector_5(player, player_dialogue3)
@@ -437,7 +433,7 @@ def branch_sector_5(player,branch_text):
                  "door to sector 5. You press the open sector button, the red spinning lights turn on, the alarms\n"
                  "blaring. As the doors open you realize you have made a grave mistake, you and kormie are face to\n"
                  "face with a normag fendle, a giant 20 foot snarling beast with scales and feathers, similar to what\n"
-                 "we believe dinosoars to have looked like but with a far more aggressive and intimidating build,\n"
+                 "we believe dinosaurs to have looked like but with a far more aggressive and intimidating build,\n"
                  "bearing rows upon rows of sharp, jagged teeth and a surprisingly but sickeningly sweet hot breath.\n")
     print(narrative)
     adventureText += narrative
@@ -471,7 +467,7 @@ def branch_sector_5(player,branch_text):
         branch_sect5_9(player, player_narrative)
 
     else:
-        narrative2 = ("Narrator: You attempt to swing at the normag but your attempts are fuetile, the normag lets out a\n"
+        narrative2 = ("Narrator: You attempt to swing at the normag but your attempts are futile, the normag lets out a\n"
                       "snort, either as a slight chuckle or annoyed grunt. The normag turns to you and bites both of\n"
                       " your arms off and slurps you up, almost all in one motion. \nYou are dead\n")
         ending3(player, narrative2)
@@ -555,8 +551,8 @@ def branch_r3_s9_pd(player, branch_text):
                  "they tied up but they do not see you.\n")
     print(narrative)
     adventureText += narrative
-    player_dialogue1 = f"{player.name} whispers: Lets untie the flight crew and have them help us fight the raiders"
-    player_dialogue2 = f"{player.name} whispers: Lets go over to the control console I have an idea..."
+    player_dialogue1 = f"{player.name}: Lets untie the flight crew and have them help us fight the raiders"
+    player_dialogue2 = f"{player.name}: Lets go over to the control console I have an idea..."
     branch_choice = validateInput("1", "2", questionCreator(player_dialogue1, player_dialogue2, player.get_name_pad()))
     if branch_choice == "1":
         ending4(player, player_dialogue1)
@@ -583,9 +579,10 @@ def branch_possible_doom(player, branch_text):
                  "ender cannons at the raiders home planet\n")
     print(narrative)
     adventureText += narrative
-    player_dialogue1 = (f"{player.name} yells: Hey shitheads, Ive got every cannon on this thing aimed for your home world, call off\n"
+    player_dialogue1 = (f"{player.name}: *yells* Hey shitheads, Ive got every cannon on this thing aimed for your home world, call off\n"
                         "all of your people or I will eradicate your entire planet")
-    player_dialogue2 = ("Narrator: You press the button, you feel nothing, you've doomed billions to a nearly instant\n"
+    player_dialogue2 = (f"{player.name}: Im going to kill the rest of their kind........ *click*\n"
+                        "Narrator: You press the button, you feel nothing, you've doomed billions to a nearly instant\n"
                         " death, you've had too many run-ins with these people to have empathy for them anymore.")
     branch_choice = validateInput("1", "2", questionCreator(player_dialogue1, player_dialogue2, player.get_name_pad()))
     if branch_choice == "1":
@@ -600,7 +597,7 @@ def ending5(player, branch_text):
     stage = Stage.END_5
     new_branch(player, branch_text, stage)
     narrative = (f"Raider Leader: You would not do that, you would never.\n"
-                 f"{player.name}: I absolutely would, don’t force my hand.)\n"
+                 f"{player.name}: I absolutely would, don’t force my hand.\n"
                  f"Narrator: The raiders stand down and you are able to take them into custody. You untie the crew and\n"
                  f"are able to put the raiders into the holding deck into individual cells, you have saved the home ship.\n")
     print(narrative)
@@ -658,7 +655,7 @@ def ending8(player, branch_text):
     stage = Stage.END_8
     new_branch(player, branch_text, stage)
     narrative = ("Narrator: You run into the polyhedron deck and you start tearing apart the raiders, you fail to count\n"
-                 "how many but that doesn’t matter, the only thing you want is vengence. The addrenaline allows you to\n"
+                 "how many but that doesn’t matter, the only thing you want is vengeance. The adrenaline allows you to\n"
                  "kill all the remaining raiders.\n"
                  "Narrator: You manage to free all of the flight crew, but they will never be able to look at you the\n"
                  "same after seeing what you did to those raiders. But the only thing that matters is that you saved\n"
