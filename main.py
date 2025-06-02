@@ -1,5 +1,6 @@
 import os.path
 import string
+from codecs import namereplace_errors
 from enum import Enum
 from symtable import Class
 import re
@@ -30,12 +31,21 @@ adventureText = ""
 #######################################################################################################################
 
 class Item(Enum):
-    SACK_OF_MEAT = 1
-    MEDIUM_GEARS = 2
-    PIANO_STRING = 3
-    PLASMA_KNUCKLES = 4
+    LASER_GUN = 1
+    GRAV_BAT = 2
+    PLASMA_KNUCKLES = 3
+    INSTA_MED = 4
+    PIANO_STRING = 5
+    MEDIUM_GEARS = 6
+    SACK_OF_MYSTERY_MEAT = 7
+
 
 class Stage(Enum):
+    END_3 = 11
+    END_2 = 10
+    SECTOR_5 = 9
+    R3 = 8
+    R2_L1 = 7
     R2 = 6
     R1_L1 = 5
     L2 = 4
@@ -55,10 +65,25 @@ class Player:
         return flag
     def add_item(self, item):
         self.inventory.append(item)
+        print(f"Added {item.name.replace('_', ' ').title()} to inventory")
+        global adventureText
+        adventureText += f"\nAdded {item.name.replace('_', ' ').title()} to inventory"
     def set_health(self, new_health):
         self.health = new_health
     def get_name_pad(self):
         return self.name.__len__() + 2
+    def has_weapon(self):
+        for item in self.inventory:
+            if item.value < 4:
+                return True
+        return False
+    def get_weapons(self):
+        weapon_list = []
+        for item in self.inventory:
+            if item.value < 4:
+                weapon_list.append(item)
+        return weapon_list
+
 
 
 #######################################################################################################################
@@ -148,10 +173,10 @@ def start_game(player):
         else:
             print("Valid name")
             break
-    player.name = check_name
+    player.name = check_name.title()
 
     # Declares the narrative string that is used for this initial starting point
-    start_game_string = (f"Kormie: WAKE UP {player.name} WAKE UP!!! How are you still asleep with all this ruckus?!!?! Nevermind, we havent much time.\n"
+    start_game_string = (f"Kormie: WAKE UP {player.name.upper()} WAKE UP!!! How are you still asleep with all this ruckus?!!?! Nevermind, we havent much time.\n"
           "Our ship has sustained significant damage, raiders have invaded sectors 2, 5, 9, and have even infiltrated\n"
           "the polyhedron deck and have taken Captain Montak and the whole flight crew hostage! I hate to say it but\n"
           "you and I may be the only ones that have not been captured or executed")
@@ -200,53 +225,194 @@ def branch_r1(player,branch_text):
     global adventureText
     stage = Stage.R1
     new_branch(player, branch_text, stage)
-    branch_r1_narrative = ("What would you like to do first? Would you like to look around your room and find a weapon"
+    branch_r1_narrative = ("Kormie: What would you like to do first? Would you like to look around your room and find a weapon"
                            "\nor other items that may help you or would you like to try and face the raiders in sector 2 empty-handed?")
     adventureText += branch_r1_narrative
     print(branch_r1_narrative)
     branch_r1_l1_player_txt = f"{player.name}: We should check the room, it would be insane if we walked out there empty handed! "
     branch_r2_player_txt = f"{player.name}: We don't have time for that! We need to get this ship under control!"
-    branch_r1_choice = validateInput("1", "2", questionCreator(branch_r1_l1_player_txt, branch_r2_player_txt, player.get_name_pad()))
+    branch_choice = validateInput("1", "2", questionCreator(branch_r1_l1_player_txt, branch_r2_player_txt, player.get_name_pad()))
+    if branch_choice == "1":
+        branch_r1_l1(player, branch_r1_l1_player_txt)
+    else:
+        branch_r2(player, branch_r2_player_txt)
 
 def branch_r1_l1(player,branch_text):
     global adventureText
     stage = Stage.R1_L1
     new_branch(player, branch_text, stage)
+    narrative = (f"Narrator: You look around the room and find find 3 weapons, (1) a laser gun which can kill pretty much any\n"
+                 f"enemy but only has 1 charge, (2)a grav-bat, and (3)a pair of plasma knuckles. You also find an\n"
+                 f"(4)insta-med, (5)3 piano strings,(6) 2 medium gears and a (7) 1 sack of mystery meat(?), you can\n"
+                 f"only take 2 items (or groups of items)")
+    adventureText += narrative
+    print(narrative)
+    chosenItems = 0
+    print("Choose Item #1")
+    while chosenItems < 2:
+        selection = int(input("Select a number 1 - 7 that correlates to an item to pick that item: "))
+        if selection < 1 or selection > 7:
+            print("Invalid choice, please try again!")
+        else:
+            for item in Item:
+                if selection == item.value:
+                    player.add_item(item)
+                    chosenItems += 1
+    branch_r2_text = "Let's get a move on, we have a ship to save!"
+    branch_r2(player, branch_r2_text)
+
+
 
 
 def branch_r2(player,branch_text):
     global adventureText
     stage = Stage.R2
     new_branch(player, branch_text, stage)
-#
-# def branch_r1(player,branch_text):
-#     global adventureText
-#     stage = Stage.R1
-#     new_branch(player, branch_text, stage)
-#
-# def branch_r1(player,branch_text):
-#     global adventureText
-#     stage = Stage.R1
-#     new_branch(player, branch_text, stage)
-#
-# def branch_r1(player,branch_text):
-#     global adventureText
-#     stage = Stage.R1
-#     new_branch(player, branch_text, stage)
-#
-#
-# def branch_r1(player, branch_text):
-#     global adventureText
-#     stage = Stage.R1
-#     new_branch(player, branch_text, stage)
-#
-#
-# def branch_r1(player, branch_text):
-#     global adventureText
-#     stage = Stage.R1
-#     new_branch(player, branch_text, stage)
-#
-#
+    narrative = (f"\nNarrator: You enter sector 2 and you see bodies strewn about and raiders rummaging through the\n"
+                 f"corpses of who used to be your friends and colleagues"
+                 f"Kormie, whispering: This is so much worse than what I saw only a hour ago..... would you like to\n"
+                 f"pick a [fight] these raiders head on or do you want to go through those [vents]?\n"
+                 f"I know a special route if we take the vents.\n")
+    player_dialogue1 = f"{player.name}: Lets crush these bastards, look at what they have done our people!"
+    player_dialogue2 = f"{player.name}: Use the vents, I want to get out of here in one piece!"
+    branch_choice = validateInput("1", "2", questionCreator(player_dialogue1, player_dialogue2, player.get_name_pad()))
+    if branch_choice == "1":
+        branch_r2_l1(player, player_dialogue1)
+    else:
+        branch_r3(player, player_dialogue2)
+
+def branch_r2_l1(player,branch_text):
+    global adventureText
+    stage = Stage.R2_L1
+    new_branch(player, branch_text, stage)
+    has_weapon = player.has_weapon()
+    laser = player.checkInventory(Item.LASER_GUN)
+    if not has_weapon:
+        narrative = ("\nNarrator: You have no weapons so you run at the 2 raiders, you start beating the first raider while Kormie\n"
+                     "takes the second one, you are both able to kill the raiders but not without losing some health\n"
+                     "-10 health\n")
+        player.set_health(90)
+    else:
+        if laser:
+            use_laser = validateInput("y", "n", "Would you like to use your laser charge?")
+            if use_laser == "y":
+                narrative = "\nNarrator: You use your laser charge and take down the enemies nearly instantly\n"
+        else:
+            narrative= ("\nNarrator: You use your melee weapon to take down one of the enemies, Kormie manages to take\n"
+                        "down the other enemy with a little help from you\n")
+    print(narrative)
+    adventureText += narrative
+    player_text = f"{player.name}: That was easy, lets get moving, we've got to get to sector 5"
+    branch_sector_5(player,player_text)
+
+def branch_r3(player, branch_text):
+    global adventureText
+    stage = Stage.R3
+    new_branch(player, branch_text, stage)
+    narrative = ("\nNarrator: You and Kormie quietly sneak over to the vent opening and make your way in. Kormie points\n"
+                 "out a loose panel on the ceiling of the vent. You reach up and slide it to the side, and climb up,\n"
+                 " pulling Kormie behind you. You look around you and notice that this is the security room in\n"
+                 " sector 9.\n"
+                 "Kormie: This is how I got back here alive, I could have never gotten past the beast the raiders\n"
+                 "accidentally let out in sector 5, those numb-skulls\n")
+    print(narrative)
+    adventureText += narrative
+    player_dialogue1 = (f"{player.name}Well that was the most sightly scene I have ever seen, I am glad we were able to get out of\n"
+                        "there alive. Thank you Kormie. I’m glad we don’t have to deal with that normag fendle, I\n"
+                        "remember how hard it was to contain when we found it on juineen alpha, Im glad It was on the\n"
+                        "smaller side otherwise we would have been toast!")
+    player_dialogue2 = f"{player.name}Yeah yeah yeah, we have a mission we need to get to, no time for chit chat!"
+    player_dialogue_choice = validateInput("1", "2", questionCreator(player_dialogue1,player_dialogue2,player.get_name_pad()))
+    if player_dialogue_choice == "1":
+        print(player_dialogue1)
+        adventureText += player_dialogue1
+    elif player_dialogue_choice == "2":
+        print(player_dialogue2)
+        adventureText += player_dialogue2
+    narrative2 = (f"\nNarrator: The room has been picked clean so there is no point in looking around, you and Kormie head\n"
+                  f"for the door, but you notice the door won’t open.\n"
+                  f"Kormie: Ah shit, I must’ve kicked the lockdown box when I was trying to get the door closed,\n"
+                  f"everything went so fast, I.. I was getting chased, Im so sorry {player.name}."
+                  f"\n{player.name}: Let me see what I can do.\n")
+    print(narrative2)
+    adventureText += narrative2
+    if player.checkInventory(Item.MEDIUM_GEARS):
+        branch_text = f"{player.name}: It looks like I have just what we need right here! Let me just put this in here"
+        branch_r3_sect9(player, )
+
+def branch_sector_5(player,branch_text):
+    global adventureText
+    stage = Stage.SECTOR_5
+    new_branch(player, branch_text, stage)
+    narrative = ("\nNarrator: You head through sector 3 and 4, the rooms riddled with bodies, a horrific scene, but you\n"
+                 "pass through with no interruption by any raiders, only their path of destruction. You arrive at the\n"
+                 "door to sector 5. You press the open sector button, the red spinning lights turn on, the alarms\n"
+                 "blaring. As the doors open you realize you have made a grave mistake, you and kormie are face to\n"
+                 "face with a normag fendle, a giant 20 foot snarling beast with scales and feathers, similar to what\n"
+                 "we believe dinosoars to have looked like but with a far more aggressive and intimidating build,\n"
+                 "bearing rows upon rows of sharp, jagged teeth and a surprisingly but sickeningly sweet hot breath.\n")
+    print(narrative)
+    adventureText += narrative
+    has_meat = player.checkInventory(Item.SACK_OF_MYSTERY_MEAT)
+    has_laser = player.checkInventory(Item.LASER_GUN)
+    if has_meat:
+        ending2txt = ("Narrator: you pull out the sack of mystery meat and the normag, surprisingly, sits down and begs\n"
+                      "like a dog for the sack of meat, it appears that you have tamed the normag, the most formidable\n"
+                      "beast in this star system!\n")
+        ending2(player, ending2txt)
+    elif has_laser:
+        narrative2 = ("\nNarrator: The normag swats at you and Kormie, both of you fall to the ground with some very deep cuts the\n"
+                      "beast starts leaning down to you to, you believe, take a bite out of you. The normag starts roaring\n"
+                      "you quickly pull out your laser and take a shot into the beasts mouth while it is roaring at you.\n"
+                      "The beast falls instantly, you have taken out the beast, once thought to be unkillable, you found\n"
+                      "its weakspot.\n"
+                      "-80 health\n"
+                      "Kormie: You are literally insane, there is no way you pulled that off, the whole crew of lormat 15\n"
+                      "couldn't even take that thing down, you’ve got some great aim. Do you have any insta-med that we\n"
+                      "could use? We barely have any health left.\n")
+        has_med = player.checkInventory(Item.INSTA_MED)
+        if has_med:
+            player_narrative = (f"\n{player.name}Luckily, I do, let's both take an injection and get out of here.\n"
+                                "+50 health\n")
+
+        else:
+            player_narrative = f"\n{player}: We are just going to have to tough it through. You move towards sector 9 doors.\n"
+        branch_sector5_9(player, player_narrative)
+
+    else:
+        narrative2 = ("\nNarrator: You attempt to swing at the normag but your attempts are fuetile, the normag lets out a\n"
+                      "snort, either as a slight chuckle or annoyed grunt. The normag turns to you and bites both of\n"
+                      " your arms off and slurps you up, almost all in one motion. \nYou are dead\n")
+        ending3(player, narrative2)
+
+
+def ending2(player, branch_text):
+    global adventureText
+    stage = Stage.END_2
+    new_branch(player, branch_text, stage)
+    narrative = ("\nYou and Kormie jump on the normags back and ride him into the polyhedron deck. When you break down\n"
+                 "the doors, all of the raiders cower in fear and disbelief. Nobody has ever seen a tamed normag. You\n"
+                 "get off the back of the normag and free the flight crew that had been held hostage by the raiders.\n"
+                 "You tie up the raiders and they are put in the holding deck in different cells. The ship has had\n"
+                 "many casualties, but you saved the homeship.\n")
+    print(narrative)
+    adventureText += narrative
+    save_game(player, stage, adventureText)
+
+
+def ending3(player, branch_text):
+    global adventureText, play
+    stage = Stage.END_3
+    new_branch(player, branch_text, stage)
+    play = False
+
+
+def branch_sector5_9(player, branch_text):
+    global adventureText
+    stage = Stage.R1
+    new_branch(player, branch_text, stage)
+
+
 # def branch_r1(player, branch_text):
 #     global adventureText
 #     stage = Stage.R1
