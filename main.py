@@ -107,6 +107,7 @@ class Player:
 #######################################################################################################################
 
 def load_game(player, saveflag = 0):
+    global adventureText
     if save_file_exists & saveflag == 1:
         save = open("adventure.txt", "r")
         adventure_details = save.readlines()
@@ -114,13 +115,61 @@ def load_game(player, saveflag = 0):
         items = adventure_details[1]
         health = adventure_details[2]
         position = adventure_details[3]
+        adventureText = adventure_details[4:]
         player.name = player_name
         for item in Item:
             if item.name in items:
                 player.add_item(item)
         player.set_health(int(health))
         save.close()
-        # need to put if elif else branch here to put the player back into the place they were before exiting
+        position = position.strip()
+        if position == Stage.START.name:
+            start_game(player)
+        elif position == Stage.L1.name:
+            branch_l1(player, "")
+        elif position == Stage.L2.name:
+            branch_l2(player, "")
+        elif position == Stage.R1.name:
+            branch_r1(player, "")
+        elif position == Stage.R1_L1.name:
+            branch_r1_l1(player, "")
+        elif position == Stage.R2.name:
+            branch_r2(player, "")
+        elif position == Stage.R2_L1.name:
+            branch_r2_l1(player, "")
+        elif position == Stage.R3.name:
+            branch_r3(player, "")
+        elif position == Stage.SECTOR_5.name:
+            branch_sector_5(player, "")
+        elif position == Stage.END_2.name:
+            ending2(player, "")
+        elif position == Stage.END_3.name:
+            ending3(player, "")
+        elif position == Stage.SECT5_9.name:
+            branch_sect5_9(player, "")
+        elif position == Stage.R3_SECT9.name:
+            branch_r3_sect9(player, "")
+        elif position == Stage.R3_SECT9_PD.name:
+            branch_r3_s9_pd(player, "")
+        elif position == Stage.END_4.name:
+            ending4(player, "")
+        elif position == Stage.POSSIBLE_DOOM.name:
+            branch_possible_doom(player, "")
+        elif position == Stage.END_5.name:
+            ending5(player, "")
+        elif position == Stage.END_6.name:
+            ending6(player, "")
+        elif position == Stage.END_7.name:
+            ending7(player, "")
+        elif position == Stage.SHATTERED.name:
+            branch_shattered(player, "")
+        elif position == Stage.END_8.name:
+            ending8(player, "")
+        else:
+            print("There was an issue loading game, we will start you at the beginning!\n")
+            start_game(player)
+
+
     else:
         start_game(player)
 
@@ -129,7 +178,7 @@ def save_game(player, stage, story):
     player_inventory_items = ""
     for item in player.inventory:
         player_inventory_items += item.name + " "
-    save_file.write(f"{player.name}\n{player_inventory_items}\n{player.health}\n{stage.name}\n{story}")
+    save_file.write(f"{player.name.strip()}\n{player_inventory_items}\n{player.health}\n{stage.name}\n{story}")
     save_file.close()
 
 #######################################################################################################################
@@ -306,17 +355,21 @@ def branch_r2_l1(player,branch_text):
                      "takes the second one, you are both able to kill the raiders but not without losing some health\n"
                      "-10 health\n")
         player.set_health(90)
+        print(narrative)
+        adventureText += narrative
     else:
         if laser:
-            use_laser = validateInput("y", "n", "Would you like to use your laser charge?")
+            use_laser = validateInput("y", "n", "Would you like to use your laser charge? (Y or N): ")
             if use_laser == "y":
                 narrative = "\nNarrator: You use your laser charge and take down the enemies nearly instantly\n"
                 player.inventory.remove(Item.LASER_GUN)
+                print(narrative)
+                adventureText += narrative
         else:
             narrative= ("\nNarrator: You use your melee weapon to take down one of the enemies, Kormie manages to take\n"
                         "down the other enemy with a little help from you\n")
-    print(narrative)
-    adventureText += narrative
+            print(narrative)
+            adventureText += narrative
     player_text = f"{player.name}: That was easy, lets get moving, we've got to get to sector 5"
     branch_sector_5(player,player_text)
 
